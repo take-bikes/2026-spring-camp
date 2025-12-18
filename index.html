@@ -18,7 +18,6 @@
             --text-main: #2d3436;
             --text-sub: #636e72;
             --glass-bg: rgba(255, 255, 255, 0.85);
-            /* 読みやすさのため少し不透明度上げ */
             --glass-border: rgba(255, 255, 255, 0.6);
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
         }
@@ -34,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* --- 背景制御（FIXEDレイヤー方式） --- */
+        /* --- 背景制御 --- */
         .bg-container {
             position: fixed;
             top: 0;
@@ -87,12 +86,11 @@
             justify-content: center;
             align-items: center;
             padding: 60px 20px;
-            /* パディング調整 */
             box-sizing: border-box;
             z-index: 2;
         }
 
-        /* --- 新しい2カラムレイアウト用のカード --- */
+        /* --- カード --- */
         .card-wide {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -100,32 +98,25 @@
             border-radius: 24px;
             width: 95%;
             max-width: 1100px;
-            /* 横幅を広く */
             box-shadow: var(--shadow);
             border: 1px solid var(--glass-border);
             margin: 20px 0;
             overflow: hidden;
-            /* 角丸からはみ出さないように */
         }
 
-        /* グリッドレイアウト（PC用） */
+        /* グリッドレイアウト */
         .split-layout {
             display: grid;
             grid-template-columns: 40% 60%;
-            /* 左4:右6の比率 */
             min-height: 600px;
         }
 
-        /* 左カラム：情報エリア */
         .left-content {
             padding: 30px;
             max-height: 80vh;
-            /* 画面内に収めて */
             overflow-y: auto;
-            /* スクロールさせる */
         }
 
-        /* スクロールバーのカスタマイズ */
         .left-content::-webkit-scrollbar {
             width: 6px;
         }
@@ -135,14 +126,12 @@
             border-radius: 3px;
         }
 
-        /* 右カラム：地図エリア */
         .right-map {
             position: relative;
             height: 100%;
             min-height: 400px;
         }
 
-        /* 地図をStickyにする（上部に固定） */
         .sticky-map-container {
             position: sticky;
             top: 0;
@@ -157,70 +146,127 @@
             display: block;
         }
 
-        /* --- ウェイポイントリスト（タイムライン風） --- */
+        /* --- ウェイポイントリスト（デザイン変更箇所） --- */
         .waypoint-list {
             margin-top: 30px;
+            padding-left: 0;
+            /* 左パディング削除 */
+        }
+
+        /* 点線（旧スタイルを無効化） */
+        .waypoint-list::before {
+            display: none;
+        }
+
+        .waypoint-item {
+            display: flex;
+            align-items: stretch;
+            /* 高さを揃える */
+            margin-bottom: 0;
+            /* マージンではなくパディングで間隔調整 */
+            padding-bottom: 20px;
+            /* 次の要素までの距離 */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .waypoint-item:last-child {
+            padding-bottom: 0;
+        }
+
+        /* 左カラム：タイムライン（マーカー＋距離） */
+        .wp-timeline {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+            /* 幅固定 */
+            margin-right: 15px;
             position: relative;
-            padding-left: 10px;
+            flex-shrink: 0;
         }
 
         /* 縦の点線 */
-        .waypoint-list::before {
+        .wp-timeline::before {
             content: '';
             position: absolute;
-            top: 15px;
-            bottom: 30px;
-            left: 24px;
-            /* 点線の位置 */
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 2px;
             border-left: 2px dashed #ccc;
             z-index: 0;
         }
 
-        .waypoint-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 25px;
-            position: relative;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 15px;
-            border-radius: 12px;
-            transition: transform 0.2s, background 0.2s;
-            border: 1px solid transparent;
+        /* 最後の要素の線は途中で消すなどの調整が必要ならここ */
+        .waypoint-item:last-child .wp-timeline::before {
+            /* height: 40px; マーカーの下少しで止める場合 */
+            /* 今回はずっと繋がっている方が綺麗なのでそのまま */
+            bottom: auto;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, transparent 100%);
+            /* 必要に応じて調整 */
         }
 
-        .waypoint-item:hover {
-            transform: translateX(5px);
-            background: #fff;
-            border-color: var(--primary);
+        .waypoint-item:last-child .wp-timeline::before {
+            /* 最後のアイテムの下への線は消す */
+            height: 40px;
         }
 
-        /* 番号マーカー */
+        /* マーカー（円） */
         .marker {
-            flex-shrink: 0;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: var(--text-main);
             color: #fff;
             border-radius: 50%;
             text-align: center;
-            line-height: 30px;
+            line-height: 32px;
             font-weight: bold;
             font-size: 0.9rem;
-            margin-right: 15px;
             z-index: 1;
-            /* 線の手前に */
+            /* 線の上に表示 */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 4px;
+            /* 距離との間隔 */
+            /* 線を隠さないように背景色を持たせるなら border: 4px solid var(--glass-bg); なども可 */
         }
 
-        /* スタート地点用のマーカー */
         .marker.start {
             background: var(--primary);
         }
 
-        .wp-content {
+        /* 縦並びの距離表示 */
+        .wp-dist-vertical {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-weight: bold;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background: rgba(255, 255, 255, 0.8);
+            /* 線が文字と被らないように背景追加 */
+            padding: 2px 4px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        /* 右カラム：コンテンツ（カード化） */
+        .wp-content-card {
             flex-grow: 1;
+            background: rgba(255, 255, 255, 0.6);
+            /* 薄い背景 */
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.2s;
+        }
+
+        /* Start Pointなどの特別感 */
+        .waypoint-item:hover .wp-content-card {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transform: translateX(2px);
         }
 
         .wp-title {
@@ -233,15 +279,6 @@
         .wp-desc {
             font-size: 0.8rem;
             color: var(--text-sub);
-        }
-
-        .wp-thumb {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: block;
         }
 
         /* --- 画像カルーセル --- */
@@ -279,14 +316,10 @@
             gap: 8px;
             border-radius: 8px;
             scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-            /* IE */
         }
 
         .wp-carousel::-webkit-scrollbar {
             display: none;
-            /* Chrome, Safari */
         }
 
         .wp-carousel-item {
@@ -304,7 +337,6 @@
             display: block;
         }
 
-        /* カルーセルインジケーター */
         .wp-indicators {
             display: flex;
             justify-content: center;
@@ -326,50 +358,31 @@
             border-radius: 10px;
         }
 
-        /* ウェイポイントの距離バッジ */
-        .wp-dist {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.05);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            font-weight: bold;
-            font-family: "Helvetica Neue", Arial, sans-serif;
-        }
 
-
-        /* --- スマホ対応（縦積み） --- */
+        /* --- スマホ対応 --- */
         @media (max-width: 768px) {
             .split-layout {
                 grid-template-columns: 1fr;
-                /* 1カラムに */
                 display: flex;
                 flex-direction: column-reverse;
-                /* 地図を上に持ってくる場合は column-reverse を削除 */
             }
 
             .left-content {
                 max-height: none;
-                /* スクロール制限解除 */
                 overflow-y: visible;
             }
 
             .right-map {
                 height: 300px;
-                /* スマホでの地図の高さ */
             }
 
             .sticky-map-container {
                 position: relative;
-                /* 固定解除 */
             }
         }
 
 
-        /* --- その他の装飾（既存維持） --- */
+        /* --- その他装飾 --- */
         h1 {
             font-size: clamp(2.5rem, 5vw, 4rem);
             color: #fff;
@@ -396,7 +409,6 @@
             margin-bottom: 10px;
             font-weight: 900;
             text-align: left;
-            /* 左寄せに変更 */
         }
 
         h3 {
@@ -405,19 +417,17 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             background: rgba(46, 196, 182, 0.1);
-            /* display: inline-block; 不要：floatでブロック化されるため */
             padding: 6px 16px;
             border-radius: 20px;
             margin-bottom: 5px;
             float: left;
-            /* 左寄せ */
         }
 
         .clear {
             clear: both;
         }
 
-        /* Stats Dashboard (Compact) */
+        /* Stats Dashboard */
         .dashboard-compact {
             background: #fff;
             border-radius: 12px;
@@ -445,7 +455,7 @@
             color: #333;
         }
 
-        /* --- モーダルなど既存スタイル --- */
+        /* --- モーダル --- */
         .animate-box {
             opacity: 0;
             transform: translateY(30px);
@@ -554,7 +564,7 @@
 <body>
 
     <div class="bg-container">
-        <div class="bg-item active" id="bg-hero" style="background-image: url('route.png');"></div>
+        <div class="bg-item active" id="bg-hero" style="background-image: url('hyosi.png');"></div>
         <div class="bg-item" id="bg-day1" style="background-image: url('day1.png');"></div>
         <div class="bg-item" id="bg-day2" style="background-image: url('day2.png');"></div>
         <div class="bg-item" id="bg-day3" style="background-image: url('day3.png');"></div>
@@ -597,13 +607,15 @@
                         <img src="elevation1.png" style="width:100%; mix-blend-mode:multiply;" alt="高低差">
                     </div>
 
-                    <h4 style="margin-bottom:10px; color:#555;">Waypoints</h4>
+                    <h4 style="margin-bottom:15px; color:#555;">Waypoints</h4>
                     <div class="waypoint-list">
 
                         <div class="waypoint-item">
-                            <div class="marker start">S</div>
-                            <div class="wp-dist">0.0 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker start">S</div>
+                                <div class="wp-dist-vertical">0.0 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">Start Point</span>
                                 <span class="wp-desc">集合場所を出発</span>
                             </div>
@@ -611,9 +623,11 @@
 
                         <div class="waypoint-item"
                             onclick="openModal('sekiyado.png', '関宿', '江戸時代の宿場町の町並みが残る重要伝統的建造物群保存地区。ランチはここで名物の「おこわ」を食べよう！')">
-                            <div class="marker">1</div>
-                            <div class="wp-dist">28.5 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">1</div>
+                                <div class="wp-dist-vertical">28.5 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🍱 ランチスポット：関宿</span>
                                 <span class="wp-desc">江戸の風情残る宿場町。</span>
                                 <div class="wp-gallery">
@@ -626,9 +640,11 @@
 
                         <div class="waypoint-item"
                             onclick="openModal('kabuto.jpg', '加太越', '「かぶとごえ」と読む難所。ここを超えれば伊賀盆地への爽快なダウンヒルが待っている！')">
-                            <div class="marker">2</div>
-                            <div class="wp-dist">34.0 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">2</div>
+                                <div class="wp-dist-vertical">34.0 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🌲 難所：加太越</span>
                                 <span class="wp-desc">未舗装路を含むアドベンチャー。</span>
                                 <div class="wp-gallery">
@@ -647,9 +663,11 @@
 
                         <div class="waypoint-item"
                             onclick="openModal('igacastle.jpg', '伊賀上野城', '高石垣で有名な忍者ゆかりの城。ゴール地点での集合写真はここで！')">
-                            <div class="marker">3</div>
-                            <div class="wp-dist">57.5 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">3</div>
+                                <div class="wp-dist-vertical">57.5 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🏰 ゴール：伊賀上野城</span>
                                 <span class="wp-desc">日本一の高石垣に圧倒される。</span>
                                 <div class="wp-gallery">
@@ -710,12 +728,14 @@
                         <img src="elevation2.png" style="width:100%; mix-blend-mode:multiply;" alt="高低差">
                     </div>
 
-                    <h4 style="margin-bottom:10px; color:#555;">Waypoints</h4>
+                    <h4 style="margin-bottom:15px; color:#555;">Waypoints</h4>
                     <div class="waypoint-list">
                         <div class="waypoint-item">
-                            <div class="marker start">S</div>
-                            <div class="wp-dist">0.0 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker start">S</div>
+                                <div class="wp-dist-vertical">0.0 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">Start Point</span>
                                 <span class="wp-desc">宿を出発</span>
                             </div>
@@ -723,9 +743,11 @@
 
                         <div class="waypoint-item"
                             onclick="openModal('joren.png', '青蓮寺湖', 'ダム湖畔の平坦区間。信号がなく、ただただ気持ちいい風を感じられるスポット。')">
-                            <div class="marker">1</div>
-                            <div class="wp-dist">23.5 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">1</div>
+                                <div class="wp-dist-vertical">23.5 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🚴‍♀️ 青蓮寺湖</span>
                                 <span class="wp-desc">信号ゼロの快走路。</span>
                                 <div class="wp-gallery">
@@ -743,11 +765,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="waypoint-item"
                             onclick="openModal('soni.jpg', '曽爾高原', '秋はススキ、春は新緑のカーペット。登りきった後のこの景色は一生モノ！')">
-                            <div class="marker">2</div>
-                            <div class="wp-dist">40.5 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">2</div>
+                                <div class="wp-dist-vertical">40.5 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">⛰️ 絶景：曽爾高原</span>
                                 <span class="wp-desc">春は新緑の大パノラマ。</span>
                                 <div class="wp-gallery">
@@ -765,11 +790,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="waypoint-item"
                             onclick="openModal('onsen.png', 'お亀の湯', 'とろっとろの泉質で肌がすべすべに。「西日本No.1」との呼び声も高い名湯。')">
-                            <div class="marker">3</div>
-                            <div class="wp-dist">41.5. km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">3</div>
+                                <div class="wp-dist-vertical">41.5 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">♨️ 至高：お亀の湯</span>
                                 <span class="wp-desc">とろとろ泉質で回復。</span>
                                 <div class="wp-gallery">
@@ -777,7 +805,6 @@
                                     <div class="wp-carousel">
                                         <div class="wp-carousel-item"><img src="kame2.jpg" alt="お亀の湯 1"></div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -823,12 +850,14 @@
                         <img src="elevation3.png" style="width:100%; mix-blend-mode:multiply;" alt="高低差">
                     </div>
 
-                    <h4 style="margin-bottom:10px; color:#555;">Waypoints</h4>
+                    <h4 style="margin-bottom:15px; color:#555;">Waypoints</h4>
                     <div class="waypoint-list">
                         <div class="waypoint-item">
-                            <div class="marker start">S</div>
-                            <div class="wp-dist">0.0 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker start">S</div>
+                                <div class="wp-dist-vertical">0.0 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">Start Point</span>
                                 <span class="wp-desc">出発</span>
                             </div>
@@ -836,9 +865,11 @@
 
                         <div class="waypoint-item"
                             onclick="openModal('muroji.jpg', '室生寺', '女人高野として知られる古刹。屋外にある国宝の五重塔としては日本最小で可愛い。')">
-                            <div class="marker">1</div>
-                            <div class="wp-dist">23.8 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">1</div>
+                                <div class="wp-dist-vertical">23.8 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">⛩️ 深山：室生寺</span>
                                 <span class="wp-desc">静寂に包まれた女人高野。</span>
                                 <div class="wp-gallery">
@@ -856,11 +887,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="waypoint-item"
                             onclick="openModal('hase.jpg', '長谷寺', '399段の登廊（のぼりろう）は圧巻！本堂の舞台から見渡す景色で、登りの疲れも吹き飛びます。')">
-                            <div class="marker">2</div>
-                            <div class="wp-dist">42.3 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">2</div>
+                                <div class="wp-dist-vertical">42.3 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🌸 花の御寺：長谷寺</span>
                                 <span class="wp-desc">長い回廊を抜けた先にある絶景。</span>
                                 <div class="wp-gallery">
@@ -878,11 +912,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="waypoint-item"
                             onclick="openModal('jingu.jpg', '橿原神宮', '初代神武天皇を祀る。広大な敷地と荘厳な空気で旅を締めくくる。')">
-                            <div class="marker">3</div>
-                            <div class="wp-dist">54.3 km</div>
-                            <div class="wp-content">
+                            <div class="wp-timeline">
+                                <div class="marker">3</div>
+                                <div class="wp-dist-vertical">54.3 km</div>
+                            </div>
+                            <div class="wp-content-card">
                                 <span class="wp-title">🏁 ゴール：橿原神宮</span>
                                 <span class="wp-desc">日本建国の地。</span>
                                 <div class="wp-gallery">
@@ -937,8 +974,7 @@
     </div>
 
     <script>
-        // --- JSは変更なし（そのまま利用可能） ---
-
+        // --- JS部分は変更なし ---
         const contentObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1016,7 +1052,6 @@
             const gallery = carousel.closest('.wp-gallery');
             const indicators = gallery.querySelectorAll('.wp-indicator');
 
-            // カルーセルのクリックイベントを止めてモーダルが開くのを防止
             carousel.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
