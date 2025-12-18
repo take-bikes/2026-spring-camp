@@ -19,14 +19,12 @@
             width: 100%;
             height: 100%;
             background-color: #000000;
-            /* ロゴの背景色に合わせる */
             z-index: 9999;
-            /* 最前面に表示 */
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease-in-out, visibility 0.8s;
-            /* フェードアウト用 */
+            /* 黒背景のフェードアウト時間 */
+            transition: opacity 1.0s ease-in-out, visibility 1.0s;
         }
 
         /* 読み込み完了時に付与されるクラス */
@@ -38,9 +36,9 @@
 
         .loading-logo-container {
             position: relative;
-            width: 250px;
-            /* ロゴのサイズ調整 */
-            height: 250px;
+            /* ロゴのコンテナサイズを大きく変更 */
+            width: 400px;
+            height: 400px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -53,7 +51,10 @@
             /* ふわっと出現し、ゆっくり回転し続ける */
             animation: logoAppear 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, logoSpin 30s linear infinite 1.5s;
             opacity: 0;
-            /* 初期状態は透明 */
+            /* 拡大フェードアウト用のトランジション設定 */
+            transition: transform 0.8s ease-in, opacity 0.8s ease-in;
+            /* 回転の中心を維持 */
+            transform-origin: center center;
         }
 
         /* 出現アニメーション */
@@ -610,11 +611,11 @@
 
     <div id="loading-screen">
         <div class="loading-logo-container">
-            <img src="image_1.png" alt="CUCC Logo" class="loading-logo">
+            <img src="CUCCブランド.png" CUCC Logo" class="loading-logo">
         </div>
     </div>
     <div class="bg-container">
-        <div class="bg-item active" id="bg-hero" style="background-image: url('route.png');"></div>
+        <div class="bg-item active" id="bg-hero" style="background-image: url('hyosi.png');"></div>
         <div class="bg-item" id="bg-day1" style="background-image: url('day1.png');"></div>
         <div class="bg-item" id="bg-day2" style="background-image: url('day2.png');"></div>
         <div class="bg-item" id="bg-day3" style="background-image: url('day3.png');"></div>
