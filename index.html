@@ -602,7 +602,7 @@
 <body>
 
     <div id="loading-screen">
-        <video id="loading-video" autoplay muted playsinline>
+        <video id="loading-video" autoplay muted playsinline webkit-playsinline preload="auto">
             <source src="opening.mp4" type="video/mp4">
             <img src="CUCCブランド.png" alt="Loading...">
         </video>
@@ -1026,13 +1026,43 @@
             loadingScreen.classList.add('loaded');
         };
 
+        // モバイルブラウザ対応：動画の自動再生を強制的に試行
+        // ページ読み込み完了後、動画の再生を試みる
+        function tryPlayVideo() {
+            // 動画が一時停止状態であれば再生を試行
+            if (video.paused) {
+                const playPromise = video.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // 再生成功 - 何もしない
+                        console.log('動画の自動再生に成功しました');
+                    }).catch((error) => {
+                        // 再生失敗 - ローディング画面を即座にスキップ
+                        console.log('動画の自動再生が失敗しました。ローディング画面をスキップします。', error);
+                        loadingScreen.classList.add('loaded');
+                    });
+                }
+            }
+        }
+
+        // ページ読み込み完了時に再生を試行
+        if (document.readyState === 'complete') {
+            tryPlayVideo();
+        } else {
+            window.addEventListener('load', tryPlayVideo);
+        }
+
+        // canplaythrough イベントでも再生を試行（動画データが十分読み込まれた時）
+        video.addEventListener('canplaythrough', tryPlayVideo);
+
         // 【安全策】もし動画の読み込みに失敗したり、長すぎたりした場合の保険
-        // 5秒経っても終わらなければ強制的に開く（秒数は動画に合わせて調整可）
+        // ５秒経っても終わらなければ強制的に開く（秒数は動画に合わせて調整可）
         setTimeout(() => {
             if (!loadingScreen.classList.contains('loaded')) {
                 loadingScreen.classList.add('loaded');
             }
-        }, 8000);
+        }, 5000);
 
         // --- JS部分は変更なし ---
         const contentObserver = new IntersectionObserver((entries) => {
