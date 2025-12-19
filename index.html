@@ -19,42 +19,34 @@
             width: 100%;
             height: 100%;
             background-color: #000000;
+            /* 動画の背景色と合わせる */
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 黒背景のフェードアウト時間 */
             transition: opacity 1.0s ease-in-out, visibility 1.0s;
         }
 
-        /* 読み込み完了時に付与されるクラス */
+        /* 読み込み完了時（動画終了時） */
         #loading-screen.loaded {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
 
-        .loading-logo-container {
-            position: relative;
-            /* ロゴのコンテナサイズを大きく変更 */
-            width: 400px;
-            height: 400px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* ロゴ画像のアニメーション */
-        .loading-logo {
-            width: 100%;
+        /* 動画のスタイル設定 */
+        #loading-video {
+            /* 画面サイズに合わせて調整 
+               max-width: 100% なのでスマホでもはみ出さない
+            */
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            /* アスペクト比を維持 */
             height: auto;
-            /* ふわっと出現し、ゆっくり回転し続ける */
-            animation: logoAppear 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, logoSpin 30s linear infinite 1.5s;
-            opacity: 0;
-            /* 拡大フェードアウト用のトランジション設定 */
-            transition: transform 0.8s ease-in, opacity 0.8s ease-in;
-            /* 回転の中心を維持 */
-            transform-origin: center center;
+
+            /* もし画面いっぱいに引き伸ばしたい場合は以下を使用（画角が変わる可能性あり） */
+            /* object-fit: cover; width: 100%; height: 100%; */
         }
 
         /* 出現アニメーション */
@@ -610,9 +602,10 @@
 <body>
 
     <div id="loading-screen">
-        <div class="loading-logo-container">
-            <img src="CUCCブランド.png" CUCC Logo" class="loading-logo">
-        </div>
+        <video id="loading-video" autoplay muted playsinline>
+            <source src="opening.mp4" type="video/mp4">
+            <img src="CUCCブランド.png" alt="Loading...">
+        </video>
     </div>
     <div class="bg-container">
         <div class="bg-item active" id="bg-hero" style="background-image: url('hyosi.png');"></div>
@@ -852,7 +845,6 @@
                                 <span class="wp-title">♨️ 至高：お亀の湯</span>
                                 <span class="wp-desc">とろとろ泉質で回復。</span>
                                 <div class="wp-gallery">
-                                    <div class="wp-gallery-hint">← スワイプで切り替え →</div>
                                     <div class="wp-carousel">
                                         <div class="wp-carousel-item"><img src="kame2.jpg" alt="お亀の湯 1"></div>
                                     </div>
@@ -1025,15 +1017,22 @@
     </div>
 
     <script>
-        // ▼▼▼ ローディング画面の制御スクリプトを追加 ▼▼▼
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loading-screen');
-            // 読み込み完了後、少し余韻を持たせてからフェードアウトさせる（ここでは1.5秒後）
-            setTimeout(() => {
+        // ▼▼▼ ローディング画面（動画）の制御スクリプト ▼▼▼
+        const loadingScreen = document.getElementById('loading-screen');
+        const video = document.getElementById('loading-video');
+
+        // 動画の再生が終了したらフェードアウトさせる
+        video.onended = () => {
+            loadingScreen.classList.add('loaded');
+        };
+
+        // 【安全策】もし動画の読み込みに失敗したり、長すぎたりした場合の保険
+        // 5秒経っても終わらなければ強制的に開く（秒数は動画に合わせて調整可）
+        setTimeout(() => {
+            if (!loadingScreen.classList.contains('loaded')) {
                 loadingScreen.classList.add('loaded');
-            }, 1500);
-        });
-        // ▲▲▲ ここまで ▲▲▲
+            }
+        }, 8000);
 
         // --- JS部分は変更なし ---
         const contentObserver = new IntersectionObserver((entries) => {
