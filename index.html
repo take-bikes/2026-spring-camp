@@ -73,6 +73,66 @@
             }
         }
 
+        /* タップ指示のスタイル */
+        #tap-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            /* クリックイベントは親要素で受け取る */
+        }
+
+        #tap-hint.visible {
+            opacity: 1;
+        }
+
+        #tap-hint .hand {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: handTap 1.5s infinite;
+        }
+
+        #tap-hint .text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            animation: textPulse 1.5s infinite;
+        }
+
+        @keyframes handTap {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes textPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         /* --- 以下、既存のCSSスタイル --- */
         /* --- 変数定義 --- */
         :root {
@@ -602,10 +662,14 @@
 <body>
 
     <div id="loading-screen">
-        <video id="loading-video" autoplay muted playsinline webkit-playsinline preload="auto">
+        <video id="loading-video" muted playsinline webkit-playsinline preload="auto">
             <source src="opening.mp4" type="video/mp4">
             <img src="CUCCブランド.png" alt="Loading...">
         </video>
+        <div id="tap-hint">
+            <div class="hand">👆</div>
+            <div class="text">Tap to Start</div>
+        </div>
     </div>
     <div class="bg-container">
         <div class="bg-item active" id="bg-hero" style="background-image: url('hyosi.png');"></div>
@@ -1020,49 +1084,63 @@
         // ▼▼▼ ローディング画面（動画）の制御スクリプト ▼▼▼
         const loadingScreen = document.getElementById('loading-screen');
         const video = document.getElementById('loading-video');
+        const tapHint = document.getElementById('tap-hint');
 
         // 動画の再生が終了したらフェードアウトさせる
         video.onended = () => {
             loadingScreen.classList.add('loaded');
         };
 
-        // モバイルブラウザ対応：動画の自動再生を強制的に試行
-        // ページ読み込み完了後、動画の再生を試みる
-        function tryPlayVideo() {
-            // 動画が一時停止状態であれば再生を試行
-            if (video.paused) {
-                const playPromise = video.play();
-
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // 再生成功 - 何もしない
-                        console.log('動画の自動再生に成功しました');
-                    }).catch((error) => {
-                        // 再生失敗 - ローディング画面を即座にスキップ
-                        console.log('動画の自動再生が失敗しました。ローディング画面をスキップします。', error);
-                        loadingScreen.classList.add('loaded');
-                    });
-                }
+        // 自動再生の試行とフォールバック処理
+        const startVideo = () => {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 自動再生成功：ヒントは非表示
+                    console.log('Autoplay successfully started');
+                    tapHint.classList.remove('visible');
+                }).catch((error) => {
+                    // 自動再生失敗（スマホなど）：ヒントを表示してユーザーのタップを促す
+                    console.log('Autoplay prevented. Showing tap hint.');
+                    tapHint.classList.add('visible');
+                });
             }
-        }
+        };
 
-        // ページ読み込み完了時に再生を試行
+        // 初期ロード時に再生試行
         if (document.readyState === 'complete') {
-            tryPlayVideo();
+            startVideo();
         } else {
-            window.addEventListener('load', tryPlayVideo);
+            window.addEventListener('load', startVideo);
         }
 
-        // canplaythrough イベントでも再生を試行（動画データが十分読み込まれた時）
-        video.addEventListener('canplaythrough', tryPlayVideo);
+        // 画面全体どこをタップしても再生するようにする
+        // 画面タップ時の処理（再生 または スキップ）
+        loadingScreen.addEventListener('click', () => {
+            // ヒントを消す
+            tapHint.classList.remove('visible');
 
-        // 【安全策】もし動画の読み込みに失敗したり、長すぎたりした場合の保険
-        // ５秒経っても終わらなければ強制的に開く（秒数は動画に合わせて調整可）
+            // 状態判定：停止中かつ未完了なら再生、それ以外（再生中など）ならスキップ（終了）
+            if (video.paused && !video.ended) {
+                // 停止中 -> 再生を試みる
+                video.play().then(() => {
+                    // 再生成功時はそのまま再生継続（onendedを待つ）
+                }).catch((e) => {
+                    // 再生失敗時は即スキップ（バグ回避のため）
+                    console.error('Manual play failed, skipping:', e);
+                    loadingScreen.classList.add('loaded');
+                });
+            } else {
+                // 再生中 または 終了済み -> ユーザーがスキップを望んだと判断して閉じる
+                video.pause();
+                loadingScreen.classList.add('loaded');
+            }
+        });
         setTimeout(() => {
             if (!loadingScreen.classList.contains('loaded')) {
                 loadingScreen.classList.add('loaded');
             }
-        }, 5000);
+        }, 8000);
 
         // --- JS部分は変更なし ---
         const contentObserver = new IntersectionObserver((entries) => {
